@@ -1,0 +1,21 @@
+{
+  "name": "c5-theme",
+  "version": "1.0.2",
+  "description": "Concrete theme installer",
+  "main": "index.js",
+  "author": "Dragos Nedelcu",
+  "license": "MIT",
+  "preferGlobal": "true",
+  "bin": {
+    "c5-install": "./index.js"
+  },
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "clear": "^0.1.0",
+    "commander": "^2.15.1",
+    "figlet": "^1.2.0",
+    "fs-extra": "^6.0.1",
+    "inquirer": "^6.0.0",
+    "log-symbols": "^2.2.0"
+  }
+}
