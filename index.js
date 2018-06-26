@@ -11,10 +11,14 @@ const logSymbols        = require("log-symbols");
 // Local requires
 const { questions }         = require("./data/questions");
 const { slider, header, generalStyles, mixins } = require("./data/predefined");
-const { aos } = require("./data/aos");
+
+//AOS
+const { aosCSS } = require("./data/aos/aosCSS");
+const { aosJS } = require("./data/aos/aosJS");
 program.version("1.0.5").parse(process.argv);
 
 const [, , ...args] = process.argv;
+// Add block 
 if(args[0] === 'add-block'){
     fs.outputFile(`./css/blocks/${args[1]}.less`, `
 .section-${args[1]}{
@@ -24,7 +28,17 @@ if(args[0] === 'add-block'){
         fs.createWriteStream(
             `./css/style.less`, {
             flags: 'a' 
-        }).write(`@import "blocks/${args[1]}`);
+        }).write(`\n@import "blocks/${args[1]}`);
+        fs.readFile('./c5.json','utf8', (err, data) => {
+            let c5JSON = JSON.parse(data);
+            c5JSON.lastUpdated = new Date().getDate() + "/"
+            + (new Date().getMonth()+1)  + "/" 
+            + new Date().getFullYear() + " @ "  
+            + new Date().getHours() + ":"  
+            + new Date().getMinutes() + ":" 
+            + new Date().getSeconds()
+            fs.outputFile('./c5.json', JSON.stringify(c5JSON, null, 4));
+        });
         console.log(
             chalk.green.bold(
             `${
@@ -47,144 +61,153 @@ if(args[0] === 'add-block'){
     
     
     
-    
     inquirer.prompt(questions).then(res => {
         !res.container ?  res.container = '1170 15' : '';
         !res.colors     ?  res.colors = '#000 #fff' : '';
         let fontResult = '';
-        let mainPath = `${args[0]}/web/application/themes/${args[0]}/css`;
+        
+        let path = `${args[0]}/web/application/themes/${args[0]}`;
+        let CSSPath = `${path}/css`;
+        let JSPath = `${path}/js`;
         mainStyle.useAOS = res.useAOS;
         mainStyle.useMixins = res.useMixins;
-    
+        
         // Check if has fonts
         res.fonts.split(' ').length ? mainStyle.hasFonts = true : '';
-    
+        
+
         res.fonts.split(' ').forEach(element => {
             fontResult += `
-            @font-face {
-                font-family: '${element}';
-                src: url('@{font-path}/files/${element}.eot');
-                src: url('@{font-path}/files/${element}.eot#iefix') format('embedded-opentype'),
-                     url('@{font-path}/files/${element}.woff2') format('woff2'),
-                     url('@{font-path}/files/${element}.woff') format('woff'),
-                     url('@{font-path}/files/${element}.ttf') format('truetype'),
-                     url('@{font-path}/files/${element}.svg#${element}') format('svg');
-                    font-weight: 400;
-                  font-style: normal;
-                  font-stretch: normal;
-                  unicode-range: U+0020-00FE;
-              }
-            `
+@font-face {
+    font-family: '${element}';
+    src: url('@{font-path}/files/${element}.eot');
+    src: url('@{font-path}/files/${element}.eot#iefix') format('embedded-opentype'),
+            url('@{font-path}/files/${element}.woff2') format('woff2'),
+            url('@{font-path}/files/${element}.woff') format('woff'),
+            url('@{font-path}/files/${element}.ttf') format('truetype'),
+            url('@{font-path}/files/${element}.svg#${element}') format('svg');
+    font-weight: 400;
+    font-style: normal;
+    font-stretch: normal;
+    unicode-range: U+0020-00FE;
+}
+`
         })
-        fs.outputFile(`${mainPath}/style.less`,
-            ''
-        );
-        fs.outputFile(`${mainPath}/fonts/fonts.less`,
+        fs.outputFile(`${JSPath}/custom.js`, 'console.log("here goes the script");');
+        fs.outputFile(`${CSSPath}/style.less`,'');
+        fs.outputFile(`${CSSPath}/fonts/fonts.less`,
             fontResult
+        );
+        fs.outputFile(`${CSSPath}/fonts/files/readme.txt`,`
+Import fonts using Fontie web-font generator
+URL: https://fontie.pixelsvsbytes.com/webfont-generator
+Keep the name as you configured in the installer.
+`
         );
         // Check if fonts are available
         let firstFont = res.fonts.split(' ')[0] ? res.fonts.split(' ')[0] + ', ' : '';
         let secondFont = res.fonts.split(' ')[1] ? res.fonts.split(' ')[1] + ', ': '';
         let alternativeFont = res.fonts.split(' ')[2] ? res.fonts.split(' ')[2] + ', ' : ''
         fs.outputFile(
-            `${mainPath}/variables.less`,
-        
-            `
-              // Main Information
-              @theme-name                   : ${args[0]};
-              @image-path                   : "application/themes/@{theme-name}/images";
-              @font-path                    : "application/themes/@{theme-name}/css/fonts/files";
-              
-              // Fonts
-              @font-main                    : '${firstFont}sans-serif';
-              @font-secondary               : '${secondFont}sans-serif';
-              @font-alternative             : '${alternativeFont}sans-serif';
-              @font-icon           	        : "FontAwesome";
-        
-              // Colors
-              @theme-color                  : ${res.colors.split(" ")[0]};
-              @theme-secondary-color        : ${res.colors.split(" ")[1]};
+            `${CSSPath}/variables.less`,`
+// Main Information
+@theme-name                   : ${args[0]};
+@image-path                   : "application/themes/@{theme-name}/images";
+@font-path                    : "application/themes/@{theme-name}/css/fonts/files";
+            
+// Fonts
+@font-main                    : '${firstFont}sans-serif';
+@font-secondary               : '${secondFont}sans-serif';
+@font-alternative             : '${alternativeFont}sans-serif';
+@font-icon           	        : "FontAwesome";
     
-              // Body
-              @body-background              : #fff;
-              @body-font-size               : 15px;
-              @body-line-height             : 30px;
-              @body-text-color              : #666;
-              @body-heading-color           : #000;
-    
-              // Menus
-              @main-menu-color              : #000;
-              @main-menu-color-hover        : @theme-color;
-              @secondary-menu-color         : #999;
-              @secondary-menu-color-hover   : @theme-color;
-    
-              // Buttons
-              @btn-radius                   : 5px;
-              @btn-padding                  : 15px 40px;
-              @btn-font-size                : 16px;
-              
-              @btn-default-color            : #fff;
-              @btn-default-bg               : @theme-color;
-              @btn-default-color-hover      : @theme-color;
-              @btn-default-bg-hover         : #fff;
-              
-              @btn-secondary-color          : @theme-color;
-              @btn-secondary-bg             : #fff;
-              @btn-secondary-color-hover    : #fff;
-              @btn-secondary-bg-hover       : @theme-color;
-    
-              // Cookiebar
-              @cookiebar-color              : @body-background;
-              @cookiebar-bg                 : #333;
-              @cookiebar-btn-color          : @btn-default-color;
-              @cookiebar-btn-bg             : @btn-default-bg;
-    
-              // Others
-              @border-color:#ebebeb;
-              @facebook-color: #3b5a9a;
-              @twitter-color: #56adf2;
-              
-              @checkbox-border: #9e9e9e;
-              @checkbox-color: #9e9e9e;
-              @radio-border: #9e9e9e;
-              @radio-color: #9e9e9e;
-    
-              // Bootstrap changes
-              @container-width              :${res.container.split(" ")[0]}px;
-              @gutter                       :${res.container.split(" ")[1]}px;
-              ${res.defaultMixins ? `
-              @screen-xxs-max               : 320px;
-              @screen-xs-max                : 767px;
-              @screen-sm-max                : 991px;
-              @screen-md-max                : 1199px;
-              @screen-lg-max                : 1399px;
-    
-              // Media-Up
-              @screen-sm-min                : 768px;
-              @screen-md-min                : 992px;
-              @screen-lg-min                : 1200px;
-              @screen-xlg-min               : @container-width;`
-                : ` `
-              }`,
+// Colors
+@theme-color                  : ${res.colors.split(" ")[0]};
+@theme-secondary-color        : ${res.colors.split(" ")[1]};
+
+// Body
+@body-background              : #fff;
+@body-font-size               : 15px;
+@body-line-height             : 30px;
+@body-text-color              : #666;
+@body-heading-color           : #000;
+
+// Menus
+@main-menu-color              : #000;
+@main-menu-color-hover        : @theme-color;
+@secondary-menu-color         : #999;
+@secondary-menu-color-hover   : @theme-color;
+
+// Buttons
+@btn-radius                   : 5px;
+@btn-padding                  : 15px 40px;
+@btn-font-size                : 16px;
+            
+@btn-default-color            : #fff;
+@btn-default-bg               : @theme-color;
+@btn-default-color-hover      : @theme-color;
+@btn-default-bg-hover         : #fff;
+            
+@btn-secondary-color          : @theme-color;
+@btn-secondary-bg             : #fff;
+@btn-secondary-color-hover    : #fff;
+@btn-secondary-bg-hover       : @theme-color;
+
+// Cookiebar
+@cookiebar-color              : @body-background;
+@cookiebar-bg                 : #333;
+@cookiebar-btn-color          : @btn-default-color;
+@cookiebar-btn-bg             : @btn-default-bg;
+
+// Others
+@border-color:#ebebeb;
+@facebook-color: #3b5a9a;
+@twitter-color: #56adf2;
+            
+@checkbox-border: #9e9e9e;
+@checkbox-color: #9e9e9e;
+@radio-border: #9e9e9e;
+@radio-color: #9e9e9e;
+
+// Bootstrap changes
+@container-width              :${res.container.split(" ")[0]}px;
+@gutter                       :${res.container.split(" ")[1]}px;
+${res.defaultMixins ? `
+@screen-xxs-max               : 320px;
+@screen-xs-max                : 767px;
+@screen-sm-max                : 991px;
+@screen-md-max                : 1199px;
+@screen-lg-max                : 1399px;
+
+// Media-Up
+@screen-sm-min                : 768px;
+@screen-md-min                : 992px;
+@screen-lg-min                : 1200px;
+@screen-xlg-min               : @container-width;`
+    : ` `
+            }`,
               
             () => {
                 let styles = fs.createWriteStream(
-                    `${mainPath}/style.less`, {
+                    `${CSSPath}/style.less`, {
                     flags: 'a' 
                 })
-                fs.outputFile(`${mainPath}/blocks/header.less`, header).then( () => styles.write(`
+                fs.outputFile(`${CSSPath}/blocks/header.less`, header).then( () => styles.write(`
     @import "blocks/header.less";`)); // Import header
     
-                fs.outputFile(`${mainPath}/mixins/mixins.less`, mixins).then( () => styles.write(`
+                fs.outputFile(`${CSSPath}/mixins/mixins.less`, mixins).then( () => styles.write(`
     @import "mixins/mixins.less";`)); // Import header
-                fs.outputFile(`${mainPath}/general-styles.less`, generalStyles).then( () => styles.write(`
+                fs.outputFile(`${CSSPath}/general-styles.less`, generalStyles).then( () => styles.write(`
     @import "general-styles.less";`)); // Import general-styles
-                fs.outputFile(`${mainPath}/blocks/footer.less`, '//Footer less will go here').then( () => styles.write(`
+                fs.outputFile(`${CSSPath}/blocks/footer.less`, '//Footer less will go here').then( () => styles.write(`
     @import "blocks/footer.less";`)); // Import footer
-                fs.outputFile(`${mainPath}/vendor/slider.less`, slider).then( () => styles.write(`
+                fs.outputFile(`${CSSPath}/vendor/slider.less`, slider).then( () => styles.write(`
     @import "vendor/slider.less";`)); // Import slider 
-                mainStyle.useAOS ? fs.outputFile(`${mainPath}/vendor/aos.less`, aos).then( () => styles.write(`
-    @import "vendor/aos.less";`)) : ''; // Import AOS
+                if(mainStyle.useAOS){
+                    fs.outputFile(`${CSSPath}/vendor/aos.less`, aosCSS).then( () => styles.write(`
+    @import "vendor/aos.less";`))
+                    fs.outputFile(`${JSPath}/vendors/aos.js`, aosJS).then( () => {})
+}; // Import AOS
     
                 styles.write(`
     @import "variables.less";`);
@@ -204,6 +227,20 @@ if(args[0] === 'add-block'){
             }
           );
         
+        // Write info about installation
+        const info = {
+            author: process.env.USERNAME,
+            themeName: args[0],
+            description: `A theme for ${args[0]} website`,
+            createdAt: new Date().getDate() + "/"
+            + (new Date().getMonth()+1)  + "/" 
+            + new Date().getFullYear() + " @ "  
+            + new Date().getHours() + ":"  
+            + new Date().getMinutes() + ":" 
+            + new Date().getSeconds()
+        }
+        fs.outputFile(`${path}/c5.json`, JSON.stringify(info, null, 4));
+
     }).catch(err => {
         if(err) throw err;
     });
