@@ -1,12 +1,12 @@
 {
   "name": "c5-theme",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Concrete theme installer",
   "main": "index.js",
   "author": "Dragos Nedelcu",
   "license": "MIT",
   "preferGlobal": "true",
-  "scripts":{
+  "scripts": {
     "start": "node index.js"
   },
   "bin": {
