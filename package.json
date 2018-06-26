@@ -6,6 +6,9 @@
   "author": "Dragos Nedelcu",
   "license": "MIT",
   "preferGlobal": "true",
+  "scripts":{
+    "start": "node index.js"
+  },
   "bin": {
     "c5-install": "./index.js"
   },

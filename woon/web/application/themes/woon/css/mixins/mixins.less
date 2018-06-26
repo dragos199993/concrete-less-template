@@ -1,0 +1,188 @@
+
+/* Media-Queries ================================================================= */
+.screen-xxs(@rules)         { @media (max-width: @screen-xxs-max)  { @rules();}}
+.screen-xs(@rules)          { @media (max-width: @screen-xs-max)  { @rules();}}
+.screen-sm(@rules)          { @media (max-width: @screen-sm-max)  { @rules();}}
+.screen-md(@rules)          { @media (max-width: @screen-md-max)  { @rules();}}
+.screen-lg(@rules)          { @media (max-width: @screen-lg-max)  { @rules();}}
+.screen-custom(@rules, @size)      { @media (max-width: @size)  { @rules();}}
+.screen-xlg(@rules)         { @media (max-width: @screen-lg-max)  { @rules();}}
+.screen-xs-min(@rules)          { @media (min-width: @screen-xs-max)  { @rules();}}
+.screen-lg-min(@rules)      { @media (min-width: @screen-lg-min)  { @rules();}}
+.screen-xlg-min(@rules)     { @media (min-width: @screen-xlg-min) { @rules();}}
+.retina(@rules) 			{ @media only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min--moz-device-pixel-ratio: 1.5), only and (min-resolution: 1.5dppx)  { @rules();}}
+
+/* Vertical-Gradient */
+.gradient( @start, @end ) {
+    background: @start;
+    filter: ~"progid:DXImageTransform.Microsoft.gradient( startColorstr='@start', endColorstr='@end',GradientType=0 )";
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,@start), color-stop(100%,@end)); 
+ 
+    background: -webkit-linear-gradient(left,  @start 0%, @end 100%); 
+    background:    -moz-linear-gradient(left,  @start 0%, @end 100%);
+    background:     -ms-linear-gradient(left,  @start 0%, @end 100%); 
+    background:      -o-linear-gradient(left,  @start 0%, @end 100%); 
+    background:         linear-gradient(left,  @start 0%, @end 100%);    
+}
+
+/* Horizontal-Gradient */
+.horizontal-gradient (@startColor: white, @endColor: white) {
+    background-color         : @startColor;
+    background-image         : -webkit-gradient(linear, left top, right top, from(@startColor), to(@endColor));
+    background-image         : -webkit-linear-gradient( left, @startColor, @endColor);
+    background-image         : -moz-linear-gradient(    left, @startColor, @endColor);
+    background-image         : -ms-linear-gradient(     left, @startColor, @endColor);
+    background-image         : -o-linear-gradient(      left, @startColor, @endColor);
+}
+
+/* Animation */
+.animation (@name, @duration:300ms, @delay:0, @ease:ease-in-out) {
+    -webkit-animation        : @name @duration @delay @ease;
+    -moz-animation           : @name @duration @delay @ease;
+    animation                : @name @duration @delay @ease;
+}
+
+/* Border radius */
+.border-radius (@radius: 0px) {
+    -webkit-border-radius    : @radius;
+    -moz-border-radius       : @radius;
+    border-radius            : @radius;
+}
+
+/* Opacity */
+.opacity( @opacity: 0.5 ) {
+    @ieopacity: @opacity * 100;
+    filter: ~"alpha(opacity = @{ieopacity} )";
+     
+    -khtml-opacity: @opacity;
+      -moz-opacity: @opacity;
+           opacity: @opacity;
+}
+
+/* Transition */
+.transition (@transition) {
+    transition               : @transition;
+    -webkit-transition       : @transition;
+    -moz-transition          : @transition;
+    -o-transition            : @transition;
+}
+
+/* Multiple transitions */
+// Usage: .transition-multiple(background 0.3s 0.3s, color 0.3s 1000s;);
+// !!! Don't forget the semicolon inside the parentheses !!!
+.transition-multiple(...) {
+    -webkit-transition: @arguments;
+    -moz-transition: @arguments;
+    -o-transition: @arguments;
+    transition: @arguments;
+}
+
+
+/* Transform */
+.transform(@string){
+    -webkit-transform        : @string;
+    -moz-transform           : @string;
+    -ms-transform            : @string;
+    -o-transform             : @string;
+}
+
+/* Rotate */
+.rotate (@deg) {
+    -webkit-transform        : rotate(@deg);
+    -moz-transform           : rotate(@deg);
+    -ms-transform            : rotate(@deg);
+    -o-transform             : rotate(@deg);
+}
+
+/* Rotate */
+.blur (@string) {
+    -webkit-filter           : blur(@string);
+    -moz-filter              : blur(@string);
+    -ms-filter               : blur(@string);
+    -o-filter                : blur(@string);
+    filter                   : blur(@string);
+}
+
+/* Skew */
+.skew (@deg, @deg2) {
+    -webkit-transform        : skew(@deg, @deg2);
+    -moz-transform           : skew(@deg, @deg2);
+    -ms-transform            : skew(@deg, @deg2);
+    -o-transform             : skew(@deg, @deg2);
+}
+
+/* Translate */
+.translate (@x, @y:0) {
+    -webkit-transform        : translate(@x, @y);
+    -moz-transform           : translate(@x, @y);
+    -ms-transform            : translate(@x, @y);
+    -o-transform             : translate(@x, @y);
+}
+
+/* Translate 3D */
+.translate3d (@x, @y: 0, @z: 0) {
+    -webkit-transform        : translate3d(@x, @y, @z);
+    -moz-transform           : translate3d(@x, @y, @z);
+    -ms-transform            : translate3d(@x, @y, @z);
+    -o-transform             : translate3d(@x, @y, @z);
+}
+
+/* Perspective */
+.perspective (@value: 1000) {
+    -webkit-perspective      : @value;
+    -moz-perspective         : @value;
+    -ms-perspective          : @value;
+    perspective              : @value;
+}
+
+/* Transform-origin */
+.transform-origin (@x:center, @y:center) {
+    -webkit-transform-origin : @x @y;
+    -moz-transform-origin    : @x @y;
+    -ms-transform-origin     : @x @y;
+    -o-transform-origin      : @x @y;
+}
+
+/* Box-sizing */
+.box-sizing (@type: border-box) {
+    -webkit-box-sizing       : @type;
+    -moz-box-sizing          : @type;
+    box-sizing               : @type;
+}
+
+/* Box-shadow */
+.box-shadow (@string) {
+    -webkit-box-shadow       : @string;
+    -moz-box-shadow          : @string;
+    box-shadow               : @string;
+}
+
+/* Text decoration */
+.no-underline{
+    text-decoration          : none;
+    outline                  : medium none;
+}
+/* Animation */
+.animation(@name; @duration: 2s; @iteration: infinite; @timing: linear) {
+    -webkit-animation: @arguments;
+            animation: @arguments;
+  }
+  
+  .keyframes(@prefix) when (@prefix = webkit) {
+    from { -webkit-transform: rotate(0deg); }
+    to { -webkit-transform: rotate(359deg); }
+  }
+  
+  .keyframes(@prefix) when (@prefix = none) {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(359deg); }
+  }
+  
+  .keyframes(@prefix) {
+  
+  }
+.placeholder(@color, @font-size) {
+    ::-webkit-input-placeholder {color: @color; font-size: @font-size;}
+    ::-moz-placeholder {color: @color; font-size: @font-size;}
+    :-ms-input-placeholder {color: @color; font-size: @font-size;}
+}

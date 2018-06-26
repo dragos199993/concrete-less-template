@@ -8,12 +8,18 @@ const chalk             = require("chalk");
 const fs                = require("fs-extra");
 const logSymbols        = require("log-symbols");
 
+// Local requires
+const { questions }         = require("./data/questions");
+const { slider, header, generalStyles, mixins } = require("./data/predefined");
+const { aos } = require("./data/aos");
 program.version("0.0.2").parse(process.argv);
 
 const [, , ...args] = process.argv;
+
 let mainStyle = {
-    hasMixins: false,
-    hasFonts: false
+    useMixins: false,
+    hasFonts: false,
+    useAOS: false
 }
 clear();
 console.log(
@@ -21,14 +27,7 @@ console.log(
 );
 console.log(chalk.red("If you want to exit, please CTRL + C\n"));
 
-const questions = [
-    { type: 'input', name: 'container', message: 'Enter the container and gutter: (1150 15)'},
-    { type: 'input', name: 'colors', message: 'Enter the main and secondary color, sepparated by space (#000 #fff)'},
-    { type: 'confirm', name: 'defaultMixins', message: 'Use the default Boostrap breakpoints mixins?'},
-    { type: 'input', name: 'fonts', message: 'Enter fonts name, separated by space:'},    
-    { type: 'confirm', name: 'useMixins', message: 'Use the predefined mixins?'},
-    // { type: 'list', name: 'servedIn', message: 'MEssage 1', choices: types },
-];
+
 
 
 inquirer.prompt(questions).then(res => {
@@ -36,15 +35,8 @@ inquirer.prompt(questions).then(res => {
     !res.colors     ?  res.colors = '#000 #fff' : '';
     let fontResult = '';
     let mainPath = `${args[0]}/web/application/themes/${args[0]}/css`;
-
-    fs.readFile('./predefined/mixins.less', 'utf8', (err,mixins) => {
-        if(res.useMixins){
-            fs.outputFile(`${mainPath}/mixins/mixins.less`,
-            mixins
-            )
-            mainStyle.hasMixins = true;
-        }
-    });
+    mainStyle.useAOS = res.useAOS;
+    mainStyle.useMixins = res.useMixins;
 
     // Check if has fonts
     res.fonts.split(' ').length ? mainStyle.hasFonts = true : '';
@@ -158,34 +150,31 @@ inquirer.prompt(questions).then(res => {
           }`,
           
         () => {
-            // Import default files
-            fs.copy('./predefined/header.less', `${mainPath}/blocks/header.less`)
-                .then(() => 
-                fs.copy('./predefined/footer.less', `${mainPath}/blocks/footer.less`)
-                    .then(() => 
-                    fs.copy('./predefined/general-style.less', `${mainPath}/general-style.less`)
-                        .then(() => 
-                        fs.copy('./predefined/slider.less', `${mainPath}/blocks/slider.less`)
-                            .then(() => '')
-                    )
-                )
-            )
             let styles = fs.createWriteStream(
                 `${mainPath}/style.less`, {
                 flags: 'a' 
             })
+            fs.outputFile(`${mainPath}/blocks/header.less`, header).then( () => styles.write(`
+@import "blocks/header.less";`)); // Import header
+
+            fs.outputFile(`${mainPath}/mixins/mixins.less`, mixins).then( () => styles.write(`
+@import "mixins/mixins.less";`)); // Import header
+            fs.outputFile(`${mainPath}/general-styles.less`, generalStyles).then( () => styles.write(`
+@import "general-styles.less";`)); // Import general-styles
+            fs.outputFile(`${mainPath}/blocks/footer.less`, '//Footer less will go here').then( () => styles.write(`
+@import "blocks/footer.less";`)); // Import footer
+            fs.outputFile(`${mainPath}/vendor/slider.less`, slider).then( () => styles.write(`
+@import "vendor/slider.less";`)); // Import slider 
+            mainStyle.useAOS ? fs.outputFile(`${mainPath}/vendor/aos.less`, aos).then( () => styles.write(`
+@import "vendor/aos.less";`)) : ''; // Import AOS
 
             styles.write(`
-                //  Modules and Variables
-                @import "variables.less";
-            `);
+@import "variables.less";`);
 
             mainStyle.hasFonts  ? styles.write(`
-                @import "fonts/fonts.less";
-            `) : '';
+@import "fonts/fonts.less";`) : '';
             mainStyle.hasMixins ? styles.write(`
-                @import "mixins/mixins.less";
-            `) : '';
+@import "mixins/mixins.less";`) : '';
           
             console.log(
                 chalk.green.bold(
