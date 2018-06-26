@@ -12,7 +12,7 @@ const logSymbols        = require("log-symbols");
 const { questions }         = require("./data/questions");
 const { slider, header, generalStyles, mixins } = require("./data/predefined");
 const { aos } = require("./data/aos");
-program.version("0.0.2").parse(process.argv);
+program.version("1.0.5").parse(process.argv);
 
 const [, , ...args] = process.argv;
 if(args[0] === 'add-block'){
@@ -25,8 +25,14 @@ if(args[0] === 'add-block'){
             `./css/style.less`, {
             flags: 'a' 
         }).write(`@import "blocks/${args[1]}`);
-        console.log('added-block');
-    }); // Import header
+        console.log(
+            chalk.green.bold(
+            `${
+                logSymbols.success
+            } Done! ${args[1]} block added.`
+            )
+        );
+    });
 }else{
     let mainStyle = {
         useMixins: false,
