@@ -1,6 +1,6 @@
 {
   "name": "c5-theme",
-  "version": "1.0.7",
+  "version": "1.1.0",
   "description": "Concrete theme installer",
   "main": "index.js",
   "author": "Dragos Nedelcu",
