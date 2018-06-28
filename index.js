@@ -9,7 +9,7 @@ const { outputFile, createWriteStream } = require("fs-extra");
 
 // Local requires
 const { questions }         = require("./data/questions");
-const { slider, header, generalStyles, mixins, fontInit, webpackConfig, webpackJSON, sampleScript, sampleComponent } = require("./data/predefined");
+const { slider, header, generalStyles, mixins, fontInit, webpackConfig, webpackJSON, sampleScript, sampleComponent, stylingAux } = require("./data/predefined");
 
 //AOS
 const { aosCSS, aosJS }  = require("./data/aos/aosJS");
@@ -17,10 +17,13 @@ const { aosCSS, aosJS }  = require("./data/aos/aosJS");
 // Utilities
 const { getCurrentTime, buildInfo, showTitle, showSuccess, showWarning, showInfo, contains } = require("./data/util");
 
-program.version("1.0.5").parse(process.argv);
+program.version("1.1.0").parse(process.argv);
 const [, , ...args] = process.argv;
 
-// Add block 
+
+
+
+
 if(args[0] === 'add-block'){
     outputFile(`./css/blocks/${args[1]}.less`, `
 .section-${args[1]}{
@@ -126,15 +129,7 @@ Keep the name as you configured in the installer.
 @cookiebar-btn-color          : @btn-default-color;
 @cookiebar-btn-bg             : @btn-default-bg;
 
-// Others
-@border-color:#ebebeb;
-@facebook-color: #3b5a9a;
-@twitter-color: #56adf2;
-            
-@checkbox-border: #9e9e9e;
-@checkbox-color: #9e9e9e;
-@radio-border: #9e9e9e;
-@radio-color: #9e9e9e;
+${stylingAux}
 
 // Bootstrap changes
 @container-width              :${res.container.split(" ")[0]}px;
@@ -195,7 +190,7 @@ ${res.defaultMixins ? `
                 showSuccess(`Done! ${args[0]} theme is now ready to use.`);
                 
                 if(contains.call(res.selectedScripts, 'Webpack')){
-                showInfo(`Please run: cd ${args[0]}/web/application/themes/${args[0]}/js/webpack/ && npm install && npm watch`)
+                showInfo(`Please run: cd ${args[0]}/web/application/themes/${args[0]}/js/webpack/ && npm install && npm run watch`)
                 }
 
             }

@@ -531,6 +531,17 @@ const mixins = `
     :-ms-input-placeholder {color: @color; font-size: @font-size;}
 }`
 
+const stylingAux = `
+// Others
+@border-color:#ebebeb;
+@facebook-color: #3b5a9a;
+@twitter-color: #56adf2;
+            
+@checkbox-border: #9e9e9e;
+@checkbox-color: #9e9e9e;
+@radio-border: #9e9e9e;
+@radio-color: #9e9e9e;`
+
 const fontInit = function(element){
 	return `
 @font-face {
@@ -625,5 +636,6 @@ module.exports = {
   webpackConfig,
   webpackJSON,
   sampleScript,
-  sampleComponent
+  sampleComponent,
+  stylingAux
 };
