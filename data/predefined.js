@@ -531,9 +531,99 @@ const mixins = `
     :-ms-input-placeholder {color: @color; font-size: @font-size;}
 }`
 
+const fontInit = function(element){
+	return `
+@font-face {
+    font-family: '${element}';
+    src: url('@{font-path}/files/${element}.eot');
+    src: url('@{font-path}/files/${element}.eot#iefix') format('embedded-opentype'),
+            url('@{font-path}/files/${element}.woff2') format('woff2'),
+            url('@{font-path}/files/${element}.woff') format('woff'),
+            url('@{font-path}/files/${element}.ttf') format('truetype'),
+            url('@{font-path}/files/${element}.svg#${element}') format('svg');
+    font-weight: 400;
+    font-style: normal;
+    font-stretch: normal;
+    unicode-range: U+0020-00FE;
+}
+`;
+}
+
+const webpackConfig = `
+const path = require("path");
+module.exports = {
+  mode: 'development',
+  entry: "./index.js",
+  output  : {
+    path        : path.resolve(__dirname, '../'),
+    filename    : 'custom.js'
+  },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env']
+          }
+        }
+      }
+    ]
+  }
+};
+`
+
+webpackJSON = `
+{
+	"name": "webpack-1",
+	"version": "1.0.0",
+	"main": "index.js",
+	"license": "MIT",
+	"scripts": {
+	  "start": "npx webpack --config=./webpack.config.js",
+	  "watch": "npx webpack --watch --config=./webpack.config.js"
+	},
+	"dependencies": {
+	  "@babel/core": "^7.0.0-beta.47",
+	  "@babel/preset-env": "^7.0.0-beta.47",
+	  "babel-loader": "^8.0.0-beta",
+	  "webpack": "^4.8.3"
+	},
+	"devDependencies": {
+	  "webpack-cli": "^2.1.3"
+	}
+  }
+  
+`
+sampleScript = `
+	import func from './comp';
+
+	let myvar = () => {
+		console.log('yay, works');
+	}
+
+	func();
+	myvar();
+`
+
+sampleComponent = `
+let func = function() {
+    console.log('Hello from component');
+};
+
+export default func;
+`
+
 module.exports = {
   header,
   generalStyles,
   slider,
-  mixins
+  mixins,
+  fontInit,
+  webpackConfig,
+  webpackJSON,
+  sampleScript,
+  sampleComponent
 };

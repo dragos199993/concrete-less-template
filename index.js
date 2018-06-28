@@ -3,63 +3,48 @@
 const inquirer          = require('inquirer');
 const program           = require("commander");
 const clear             = require("clear");
-const figlet            = require("figlet");
+const {textSync}        = require("figlet")
 const chalk             = require("chalk");
-const fs                = require("fs-extra");
-const logSymbols        = require("log-symbols");
+const { outputFile, createWriteStream } = require("fs-extra");
 
 // Local requires
 const { questions }         = require("./data/questions");
-const { slider, header, generalStyles, mixins } = require("./data/predefined");
+const { slider, header, generalStyles, mixins, fontInit, webpackConfig, webpackJSON, sampleScript, sampleComponent } = require("./data/predefined");
 
 //AOS
-const { aosCSS } = require("./data/aos/aosCSS");
-const { aosJS } = require("./data/aos/aosJS");
-program.version("1.0.5").parse(process.argv);
+const { aosCSS, aosJS }  = require("./data/aos/aosJS");
 
+// Utilities
+const { getCurrentTime, buildInfo, showTitle, showSuccess, showWarning, showInfo, contains } = require("./data/util");
+
+program.version("1.0.5").parse(process.argv);
 const [, , ...args] = process.argv;
+
 // Add block 
 if(args[0] === 'add-block'){
-    fs.outputFile(`./css/blocks/${args[1]}.less`, `
+    outputFile(`./css/blocks/${args[1]}.less`, `
 .section-${args[1]}{
     // CSS goes here
 }
     `).then( () => {
-        fs.createWriteStream(
+        createWriteStream(
             `./css/style.less`, {
             flags: 'a' 
-        }).write(`\n@import "blocks/${args[1]}`);
-        fs.readFile('./c5.json','utf8', (err, data) => {
+        }).write(`
+\n@import "blocks/${args[1]};`);
+        readFile('./c5.json','utf8', (err, data) => {
             let c5JSON = JSON.parse(data);
-            c5JSON.lastUpdated = new Date().getDate() + "/"
-            + (new Date().getMonth()+1)  + "/" 
-            + new Date().getFullYear() + " @ "  
-            + new Date().getHours() + ":"  
-            + new Date().getMinutes() + ":" 
-            + new Date().getSeconds()
-            fs.outputFile('./c5.json', JSON.stringify(c5JSON, null, 4));
+            c5JSON.lastUpdated = getCurrentTime;
+            outputFile('./c5.json', JSON.stringify(c5JSON, null, 4));
         });
-        console.log(
-            chalk.green.bold(
-            `${
-                logSymbols.success
-            } Done! ${args[1]} block added.`
-            )
-        );
+        showSuccess(`Done! ${args[1]} block added.`)
     });
 }else{
-    let mainStyle = {
-        useMixins: false,
-        hasFonts: false,
-        useAOS: false
-    }
+    let mainStyle = {}
+
     clear();
-    console.log(
-      chalk.blue(figlet.textSync(`C5 installer`, { horizontalLayout: "full" }))
-    );
-    console.log(chalk.red("If you want to exit, please CTRL + C\n"));
-    
-    
+    showTitle();
+    showWarning("If you want to exit, please CTRL + C\n");
     
     inquirer.prompt(questions).then(res => {
         !res.container ?  res.container = '1170 15' : '';
@@ -69,36 +54,18 @@ if(args[0] === 'add-block'){
         let path = `${args[0]}/web/application/themes/${args[0]}`;
         let CSSPath = `${path}/css`;
         let JSPath = `${path}/js`;
-        mainStyle.useAOS = res.useAOS;
         mainStyle.useMixins = res.useMixins;
         
         // Check if has fonts
         res.fonts.split(' ').length ? mainStyle.hasFonts = true : '';
-        
-
         res.fonts.split(' ').forEach(element => {
-            fontResult += `
-@font-face {
-    font-family: '${element}';
-    src: url('@{font-path}/files/${element}.eot');
-    src: url('@{font-path}/files/${element}.eot#iefix') format('embedded-opentype'),
-            url('@{font-path}/files/${element}.woff2') format('woff2'),
-            url('@{font-path}/files/${element}.woff') format('woff'),
-            url('@{font-path}/files/${element}.ttf') format('truetype'),
-            url('@{font-path}/files/${element}.svg#${element}') format('svg');
-    font-weight: 400;
-    font-style: normal;
-    font-stretch: normal;
-    unicode-range: U+0020-00FE;
-}
-`
-        })
-        fs.outputFile(`${JSPath}/custom.js`, 'console.log("here goes the script");');
-        fs.outputFile(`${CSSPath}/style.less`,'');
-        fs.outputFile(`${CSSPath}/fonts/fonts.less`,
-            fontResult
-        );
-        fs.outputFile(`${CSSPath}/fonts/files/readme.txt`,`
+            fontResult += fontInit(element);
+        });
+
+        outputFile(`${JSPath}/custom.js`, 'console.log("here goes the script");');
+        outputFile(`${CSSPath}/style.less`, '');
+        outputFile(`${CSSPath}/fonts/fonts.less`, fontResult);
+        outputFile(`${CSSPath}/fonts/files/readme.txt`,`
 Import fonts using Fontie web-font generator
 URL: https://fontie.pixelsvsbytes.com/webfont-generator
 Keep the name as you configured in the installer.
@@ -108,7 +75,7 @@ Keep the name as you configured in the installer.
         let firstFont = res.fonts.split(' ')[0] ? res.fonts.split(' ')[0] + ', ' : '';
         let secondFont = res.fonts.split(' ')[1] ? res.fonts.split(' ')[1] + ', ': '';
         let alternativeFont = res.fonts.split(' ')[2] ? res.fonts.split(' ')[2] + ', ' : ''
-        fs.outputFile(
+        outputFile(
             `${CSSPath}/variables.less`,`
 // Main Information
 @theme-name                   : ${args[0]};
@@ -188,58 +155,54 @@ ${res.defaultMixins ? `
             }`,
               
             () => {
-                let styles = fs.createWriteStream(
+                let styles = createWriteStream(
                     `${CSSPath}/style.less`, {
                     flags: 'a' 
                 })
-                fs.outputFile(`${CSSPath}/blocks/header.less`, header).then( () => styles.write(`
-    @import "blocks/header.less";`)); // Import header
+                
+                if(contains.call(res.selectedScripts, 'Webpack')){
+                    outputFile(`${JSPath}/webpack/webpack.config.js`, webpackConfig);
+                    outputFile(`${JSPath}/webpack/package.json`, webpackJSON);
+                    outputFile(`${JSPath}/webpack/index.js`, sampleScript);
+                    outputFile(`${JSPath}/webpack/comp.js`, sampleComponent);
+                }
+                if(contains.call(res.selectedScripts, 'AOS')){
+                    outputFile(`${CSSPath}/vendor/aos.less`, aosCSS).then( () => styles.write(`
+@import "vendor/aos.less";`))
+                    outputFile(`${JSPath}/vendors/aos.js`, aosJS).then( () => {})
+                }
+                outputFile(`${CSSPath}/blocks/header.less`, header).then( () => styles.write(`
+@import "blocks/header.less";`)); // Import header
     
-                fs.outputFile(`${CSSPath}/mixins/mixins.less`, mixins).then( () => styles.write(`
-    @import "mixins/mixins.less";`)); // Import header
-                fs.outputFile(`${CSSPath}/general-styles.less`, generalStyles).then( () => styles.write(`
-    @import "general-styles.less";`)); // Import general-styles
-                fs.outputFile(`${CSSPath}/blocks/footer.less`, '//Footer less will go here').then( () => styles.write(`
-    @import "blocks/footer.less";`)); // Import footer
-                fs.outputFile(`${CSSPath}/vendor/slider.less`, slider).then( () => styles.write(`
-    @import "vendor/slider.less";`)); // Import slider 
-                if(mainStyle.useAOS){
-                    fs.outputFile(`${CSSPath}/vendor/aos.less`, aosCSS).then( () => styles.write(`
-    @import "vendor/aos.less";`))
-                    fs.outputFile(`${JSPath}/vendors/aos.js`, aosJS).then( () => {})
-}; // Import AOS
+                outputFile(`${CSSPath}/mixins/mixins.less`, mixins).then( () => styles.write(`
+@import "mixins/mixins.less";`)); // Import header
+                outputFile(`${CSSPath}/general-styles.less`, generalStyles).then( () => styles.write(`
+@import "general-styles.less";`)); // Import general-styles
+                outputFile(`${CSSPath}/blocks/footer.less`, '//Footer less will go here').then( () => styles.write(`
+@import "blocks/footer.less";`)); // Import footer
+                outputFile(`${CSSPath}/vendor/slider.less`, slider).then( () => styles.write(`
+@import "vendor/slider.less";`)); // Import slider 
+
+                
     
                 styles.write(`
-    @import "variables.less";`);
-    
+@import "variables.less";`);
                 mainStyle.hasFonts  ? styles.write(`
-    @import "fonts/fonts.less";`) : '';
+@import "fonts/fonts.less";`) : '';
                 mainStyle.hasMixins ? styles.write(`
-    @import "mixins/mixins.less";`) : '';
+@import "mixins/mixins.less";`) : '';
               
-                console.log(
-                    chalk.green.bold(
-                    `${
-                        logSymbols.success
-                    } Done! ${args[0]} theme is now ready to use.`
-                    )
-                );
+                showSuccess(`Done! ${args[0]} theme is now ready to use.`);
+                
+                if(contains.call(res.selectedScripts, 'Webpack')){
+                showInfo(`Please run: cd ${args[0]}/web/application/themes/${args[0]}/js/webpack/ && npm install && npm watch`)
+                }
+
             }
           );
         
         // Write info about installation
-        const info = {
-            author: process.env.USERNAME,
-            themeName: args[0],
-            description: `A theme for ${args[0]} website`,
-            createdAt: new Date().getDate() + "/"
-            + (new Date().getMonth()+1)  + "/" 
-            + new Date().getFullYear() + " @ "  
-            + new Date().getHours() + ":"  
-            + new Date().getMinutes() + ":" 
-            + new Date().getSeconds()
-        }
-        fs.outputFile(`${path}/c5.json`, JSON.stringify(info, null, 4));
+        outputFile(`${path}/c5.json`, JSON.stringify(buildInfo(args[0]), null, 4));
 
     }).catch(err => {
         if(err) throw err;
