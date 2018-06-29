@@ -17,7 +17,7 @@ const { aosCSS, aosJS }  = require("./data/aos/aosJS");
 // Utilities
 const { getCurrentTime, buildInfo, showTitle, showSuccess, showWarning, showInfo, contains } = require("./data/util");
 
-program.version("1.1.0").parse(process.argv);
+program.version("1.1.1").parse(process.argv);
 const [, , ...args] = process.argv;
 
 
@@ -44,7 +44,7 @@ if(args[0] === 'add-block'){
         showSuccess(`Done! ${args[1]} block added.`)
     });
 }else{
-    
+
     let mainStyle = {}
     clear();
     showTitle();
