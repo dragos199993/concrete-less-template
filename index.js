@@ -5,7 +5,7 @@ const program           = require("commander");
 const clear             = require("clear");
 const {textSync}        = require("figlet")
 const chalk             = require("chalk");
-const { outputFile, createWriteStream } = require("fs-extra");
+const { outputFile, createWriteStream, readFile } = require("fs-extra");
 
 // Local requires
 const { questions }         = require("./data/questions");
@@ -17,7 +17,7 @@ const { aosCSS, aosJS }  = require("./data/aos/aosJS");
 // Utilities
 const { getCurrentTime, buildInfo, showTitle, showSuccess, showWarning, showInfo, contains } = require("./data/util");
 
-program.version("1.1.1").parse(process.argv);
+program.version("1.1.2").parse(process.argv);
 const [, , ...args] = process.argv;
 
 
