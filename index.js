@@ -37,14 +37,15 @@ if(args[0] === 'add-block'){
 \n@import "blocks/${args[1]};`);
         readFile('./c5.json','utf8', (err, data) => {
             let c5JSON = JSON.parse(data);
+            c5JSON.lastModifiedBy = process.env.USERNAME;
             c5JSON.lastUpdated = getCurrentTime;
             outputFile('./c5.json', JSON.stringify(c5JSON, null, 4));
         });
         showSuccess(`Done! ${args[1]} block added.`)
     });
 }else{
+    
     let mainStyle = {}
-
     clear();
     showTitle();
     showWarning("If you want to exit, please CTRL + C\n");
